@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>發票計算器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-5">
+    <div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow-md">
+        <h1 class="text-xl font-bold mb-4 text-blue-600">發票小幫手測試版</h1>
+        
+        <div class="mb-4">
+            <label class="block mb-2 font-bold">輸入金額</label>
+            <input type="number" id="inputAmt" class="w-full p-3 border rounded" placeholder="請輸入金額" oninput="doCalc()">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 mb-4">
+            <label class="bg-blue-50 p-2 rounded cursor-pointer text-center">
+                <input type="radio" name="t" value="ex" checked onclick="doCalc()"> 未稅
+            </label>
+            <label class="bg-blue-50 p-2 rounded cursor-pointer text-center">
+                <input type="radio" name="t" value="in" onclick="doCalc()"> 含稅
+            </label>
+        </div>
+
+        <div class="space-y-2 text-lg">
+            <div class="flex justify-between"><span>銷售額(未稅):</span> <span id="s1" class="font-mono text-gray-600">$0</span></div>
+            <div class="flex justify-between"><span>營業稅(5%):</span> <span id="s2" class="font-mono text-blue-600">$0</span></div>
+            <div class="flex justify-between border-t pt-2 text-xl font-bold"><span>總計:</span> <span id="s3" class="text-blue-800">$0</span></div>
+        </div>
+
+        <div class="mt-6 p-4 bg-yellow-50 rounded border border-yellow-200">
+            <div class="text-sm text-yellow-700 font-bold">中文大寫：</div>
+            <div id="bigNum" class="text-lg font-bold py-2">零元整</div>
+        </div>
+        
+        <button onclick="alert('JS 運作正常！')" class="mt-4 w-full py-2 text-xs text-gray-400 border border-dashed rounded">點我檢查 JavaScript 狀態</button>
+    </div>
+
+    <script>
+        function doCalc() {
+            const val = parseFloat(document.getElementById('inputAmt').value) || 0;
+            const type = document.querySelector('input[name="t"]:checked').value;
+            let s, t, total;
+
+            if (type === 'ex') {
+                s = val;
+                t = Math.round(s * 0.05);
+                total = s + t;
+            } else {
+                total = val;
+                s = Math.round(total / 1.05);
+                t = total - s;
+            }
+
+            document.getElementById('s1').innerText = '$' + s.toLocaleString();
+            document.getElementById('s2').innerText = '$' + t.toLocaleString();
+            document.getElementById('s3').innerText = '$' + total.toLocaleString();
+            document.getElementById('bigNum').innerText = nToC(total);
+        }
+
+        function nToC(n) {
+            if (n === 0) return "零元整";
+            let fraction = ['角', '分'];
+            let digit = ['零', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌', '玖'];
+            let unit = [['元', '萬', '億'], ['', '拾', '佰', '仟']];
+            let s = '';
+            let integerPart = Math.floor(n);
+            for (let i = 0; i < unit[0].length && integerPart > 0; i++) {
+                let p = '';
+                for (let j = 0; j < unit[1].length && integerPart > 0; j++) {
+                    p = digit[integerPart % 10] + unit[1][j] + p;
+                    integerPart = Math.floor(integerPart / 10);
+                }
+                s = p.replace(/(零.)*零$/, '').replace(/^$/, '零') + unit[0][i] + s;
+            }
+            return s.replace(/(零.)*零元/, '元').replace(/(零.)+/g, '零').replace(/^整$/, '零元整') + '整';
+        }
+    </script>
+</body>
+</html>
