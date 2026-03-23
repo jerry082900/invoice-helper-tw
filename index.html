@@ -2,48 +2,157 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>發票計算器</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>開發票小幫手 - 三聯式發票計算與教學</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; }
+    </style>
 </head>
-<body class="bg-gray-100 p-5">
-    <div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow-md">
-        <h1 class="text-xl font-bold mb-4 text-blue-600">發票小幫手測試版</h1>
+<body class="bg-slate-50 min-h-screen py-8 px-4">
+
+    <div class="max-w-2xl mx-auto">
         
-        <div class="mb-4">
-            <label class="block mb-2 font-bold">輸入金額</label>
-            <input type="number" id="inputAmt" class="w-full p-3 border rounded" placeholder="請輸入金額" oninput="doCalc()">
+        <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200 mb-8">
+            <div class="bg-indigo-600 px-6 py-5 text-white text-center">
+                <h1 class="text-2xl font-bold">發票金額計算器</h1>
+                <p class="text-indigo-100 text-sm mt-1">精確計算營業稅、總計與中文大寫</p>
+            </div>
+
+            <div class="p-6 space-y-6">
+                <div class="flex p-1 bg-slate-100 rounded-lg">
+                    <button id="btnEx" onclick="setType('ex')" class="flex-1 py-2 rounded-md text-sm font-bold transition-all bg-white shadow text-indigo-600">輸入未稅 (銷售額)</button>
+                    <button id="btnIn" onclick="setType('in')" class="flex-1 py-2 rounded-md text-sm font-bold transition-all text-slate-500 hover:text-indigo-600">輸入含稅 (總計)</button>
+                </div>
+
+                <div>
+                    <label class="block text-slate-600 text-sm font-bold mb-2">金額 (NTD)</label>
+                    <input type="number" id="inputAmt" oninput="doCalc()" placeholder="請輸入金額" 
+                        class="w-full px-4 py-4 border-2 border-slate-100 rounded-xl focus:border-indigo-500 focus:outline-none text-2xl font-mono text-slate-800">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <div class="text-slate-500 text-xs font-bold mb-1">銷售額 (未稅)</div>
+                        <div id="resS1" class="text-xl font-bold text-slate-700">$0</div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <div class="text-slate-500 text-xs font-bold mb-1">營業稅 (5%)</div>
+                        <div id="resS2" class="text-xl font-bold text-indigo-600">$0</div>
+                    </div>
+                    <div class="col-span-2 bg-indigo-50 p-5 rounded-xl border border-indigo-100 text-center">
+                        <div class="text-indigo-500 text-xs font-bold mb-1">總計金額 (含稅)</div>
+                        <div id="resS3" class="text-4xl font-black text-indigo-900">$0</div>
+                    </div>
+                </div>
+
+                <div class="relative group bg-amber-50 p-5 rounded-xl border border-amber-200">
+                    <div class="text-amber-700 text-xs font-bold mb-2 flex justify-between">
+                        <span>中文大寫金額</span>
+                        <span class="text-[10px] bg-amber-200 px-2 py-0.5 rounded uppercase">正式發票用</span>
+                    </div>
+                    <div id="bigNum" class="text-xl font-bold text-slate-800 tracking-wider">零元整</div>
+                    <button onclick="copyBigNum()" class="mt-3 w-full py-2 bg-white border border-amber-300 text-amber-700 rounded-lg text-sm hover:bg-amber-100 transition-colors">
+                        複製大寫文字
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2 mb-4">
-            <label class="bg-blue-50 p-2 rounded cursor-pointer text-center">
-                <input type="radio" name="t" value="ex" checked onclick="doCalc()"> 未稅
-            </label>
-            <label class="bg-blue-50 p-2 rounded cursor-pointer text-center">
-                <input type="radio" name="t" value="in" onclick="doCalc()"> 含稅
-            </label>
-        </div>
+        <div class="bg-white shadow-lg rounded-2xl p-8 border border-slate-100 prose prose-slate max-w-none">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center">
+                <span class="w-2 h-8 bg-indigo-600 rounded-full mr-3"></span>
+                三聯式發票怎麼寫？新手圖解教學
+            </h2>
+            
+            <div class="space-y-8 text-slate-600">
+                <section>
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center">
+                        <span class="bg-slate-200 text-slate-700 w-6 h-6 rounded-full text-xs flex items-center justify-center mr-2">1</span>
+                        確認基本資訊
+                    </h3>
+                    <p class="mt-2 text-sm leading-relaxed">
+                        在動筆前，請務必確認對方的<strong>「統一編號」</strong>與<strong>「公司抬頭」</strong>。三聯式發票通常用於公司對公司的交易（B2B），這兩項資訊若錯誤，對方將無法報帳。
+                    </p>
+                </section>
 
-        <div class="space-y-2 text-lg">
-            <div class="flex justify-between"><span>銷售額(未稅):</span> <span id="s1" class="font-mono text-gray-600">$0</span></div>
-            <div class="flex justify-between"><span>營業稅(5%):</span> <span id="s2" class="font-mono text-blue-600">$0</span></div>
-            <div class="flex justify-between border-t pt-2 text-xl font-bold"><span>總計:</span> <span id="s3" class="text-blue-800">$0</span></div>
-        </div>
+                <section>
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center">
+                        <span class="bg-slate-200 text-slate-700 w-6 h-6 rounded-full text-xs flex items-center justify-center mr-2">2</span>
+                        金額填寫關鍵：中文大寫
+                    </h3>
+                    <p class="mt-2 text-sm leading-relaxed mb-4">
+                        發票上的金額必須使用<strong>「中文大寫」</strong>，且絕對不可塗改或使用修正帶。
+                    </p>
+                    <div class="grid grid-cols-4 gap-2 bg-slate-50 p-4 rounded-lg font-mono text-center text-sm border border-slate-200">
+                        <div>壹</div><div>貳</div><div>參</div><div>肆</div>
+                        <div>伍</div><div>陸</div><div>柒</div><div>捌</div>
+                        <div>玖</div><div>拾</div><div>佰</div><div>仟</div>
+                    </div>
+                </section>
 
-        <div class="mt-6 p-4 bg-yellow-50 rounded border border-yellow-200">
-            <div class="text-sm text-yellow-700 font-bold">中文大寫：</div>
-            <div id="bigNum" class="text-lg font-bold py-2">零元整</div>
+                <section>
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center">
+                        <span class="bg-slate-200 text-slate-700 w-6 h-6 rounded-full text-xs flex items-center justify-center mr-2">3</span>
+                        三聯單的用途
+                    </h3>
+                    <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="border rounded-lg p-3 text-center">
+                            <div class="font-bold text-indigo-600">第一聯</div>
+                            <div class="text-xs">存根聯 (自存)</div>
+                        </div>
+                        <div class="border rounded-lg p-3 text-center border-indigo-200 bg-indigo-50">
+                            <div class="font-bold text-indigo-600">第二聯</div>
+                            <div class="text-xs">扣抵聯 (交予客戶)</div>
+                        </div>
+                        <div class="border rounded-lg p-3 text-center">
+                            <div class="font-bold text-indigo-600">第三聯</div>
+                            <div class="text-xs">收執聯 (交予客戶)</div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="bg-red-50 p-5 rounded-xl border border-red-100 flex items-start">
+                    <span class="text-2xl mr-3">⚠️</span>
+                    <div>
+                        <h4 class="font-bold text-red-800 text-sm">寫錯了怎麼辦？</h4>
+                        <p class="text-xs text-red-700 mt-1 leading-relaxed">
+                            如果不小心寫錯，請將該份發票（三聯都要）對摺，標註「作廢」，並釘回存根聯。不可撕毀，否則會導致帳目對不起來。
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="mt-10 text-center text-slate-400 text-[10px]">
+                &copy; 2026 發票小幫手工具站 - 本工具僅供試算參考
+            </p>
         </div>
-        
-        <button onclick="alert('JS 運作正常！')" class="mt-4 w-full py-2 text-xs text-gray-400 border border-dashed rounded">點我檢查 JavaScript 狀態</button>
     </div>
 
     <script>
+        let currentType = 'ex';
+
+        function setType(type) {
+            currentType = type;
+            const bEx = document.getElementById('btnEx');
+            const bIn = document.getElementById('btnIn');
+            
+            if(type === 'ex') {
+                bEx.className = "flex-1 py-2 rounded-md text-sm font-bold bg-white shadow text-indigo-600 transition-all";
+                bIn.className = "flex-1 py-2 rounded-md text-sm font-bold text-slate-500 hover:text-indigo-600 transition-all";
+            } else {
+                bIn.className = "flex-1 py-2 rounded-md text-sm font-bold bg-white shadow text-indigo-600 transition-all";
+                bEx.className = "flex-1 py-2 rounded-md text-sm font-bold text-slate-500 hover:text-indigo-600 transition-all";
+            }
+            doCalc();
+        }
+
         function doCalc() {
             const val = parseFloat(document.getElementById('inputAmt').value) || 0;
-            const type = document.querySelector('input[name="t"]:checked').value;
             let s, t, total;
 
-            if (type === 'ex') {
+            if (currentType === 'ex') {
                 s = val;
                 t = Math.round(s * 0.05);
                 total = s + t;
@@ -53,15 +162,14 @@
                 t = total - s;
             }
 
-            document.getElementById('s1').innerText = '$' + s.toLocaleString();
-            document.getElementById('s2').innerText = '$' + t.toLocaleString();
-            document.getElementById('s3').innerText = '$' + total.toLocaleString();
+            document.getElementById('resS1').innerText = '$' + s.toLocaleString();
+            document.getElementById('resS2').innerText = '$' + t.toLocaleString();
+            document.getElementById('resS3').innerText = '$' + total.toLocaleString();
             document.getElementById('bigNum').innerText = nToC(total);
         }
 
         function nToC(n) {
             if (n === 0) return "零元整";
-            let fraction = ['角', '分'];
             let digit = ['零', '壹', '貳', '參', '肆', '伍', '陸', '柒', '捌', '玖'];
             let unit = [['元', '萬', '億'], ['', '拾', '佰', '仟']];
             let s = '';
@@ -75,6 +183,11 @@
                 s = p.replace(/(零.)*零$/, '').replace(/^$/, '零') + unit[0][i] + s;
             }
             return s.replace(/(零.)*零元/, '元').replace(/(零.)+/g, '零').replace(/^整$/, '零元整') + '整';
+        }
+
+        function copyBigNum() {
+            const t = document.getElementById('bigNum').innerText;
+            navigator.clipboard.writeText(t).then(() => alert('已複製大寫金額：' + t));
         }
     </script>
 </body>
