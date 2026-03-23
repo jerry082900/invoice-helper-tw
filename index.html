@@ -207,14 +207,20 @@
 
 <script>
 function searchTaxId() {
-    const id = document.getElementById('taxId').value;
+    const id = document.getElementById('taxId').value.trim();
+    
+    // 基本格式驗證
     if (id.length !== 8 || isNaN(id)) {
         alert('請輸入正確的 8 位數字統一編號');
         return;
     }
-    // 跳轉至經濟部查詢頁面 (以統編作為參數)
-    const url = `https://findbiz.nat.gov.tw/fts/lookup/browse/queryBusiness.fts?businessNo=${id}`;
-    window.open(url, '_blank');
+
+    // 方案 A：跳轉至財政部稅務入口網 (公示資料查詢頁面)
+    // 註：因為政府網站常擋直接連結，我們導向搜尋首頁是最保險的，或者使用 Google 搜尋語法
+    const googleSearchUrl = `https://www.google.com/search?q=統編+${id}+公司名稱`;
+    
+    // 方案 B：直接開新視窗搜尋
+    window.open(googleSearchUrl, '_blank');
 }
 </script>
 </body>
